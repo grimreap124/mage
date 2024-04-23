@@ -4,9 +4,7 @@ import com.google.common.base.CharMatcher;
 import mage.MageObject;
 import mage.Mana;
 import mage.ObjectColor;
-import mage.abilities.Ability;
-import mage.abilities.AbilityImpl;
-import mage.abilities.Mode;
+import mage.abilities.*;
 import mage.abilities.common.*;
 import mage.abilities.condition.Condition;
 import mage.abilities.costs.Cost;
@@ -35,6 +33,7 @@ import mage.filter.predicate.Predicates;
 import mage.game.command.Dungeon;
 import mage.game.command.Plane;
 import mage.game.draft.DraftCube;
+import mage.game.events.GameEvent;
 import mage.game.permanent.token.Token;
 import mage.game.permanent.token.TokenImpl;
 import mage.game.permanent.token.custom.CreatureToken;
@@ -62,6 +61,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author JayDi85
@@ -960,7 +960,9 @@ public class VerifyCardDataTest {
 
         // CHECK: wrong set name
         for (ExpansionSet set : sets) {
-            if (true) continue; // TODO: enable after merge of 40k's cards pull requests (needs before set rename)
+            if (true) {
+                continue; // TODO: enable after merge of 40k's cards pull requests (needs before set rename)
+            }
             MtgJsonSet jsonSet = MtgJsonService.sets().getOrDefault(set.getCode().toUpperCase(Locale.ENGLISH), null);
             if (jsonSet == null) {
                 // unofficial or inner set
@@ -978,7 +980,9 @@ public class VerifyCardDataTest {
 
         // CHECK: parent and block info
         for (ExpansionSet set : sets) {
-            if (true) continue; // TODO: comments it and run to find a problems
+            if (true) {
+                continue; // TODO: comments it and run to find a problems
+            }
             MtgJsonSet jsonSet = MtgJsonService.sets().getOrDefault(set.getCode().toUpperCase(Locale.ENGLISH), null);
             if (jsonSet == null) {
                 continue;
@@ -1011,7 +1015,9 @@ public class VerifyCardDataTest {
 
             // block info
             if (!Objects.equals(set.getBlockName(), jsonSet.block)) {
-                if (true) continue; // TODO: comments it and run to find a problems
+                if (true) {
+                    continue; // TODO: comments it and run to find a problems
+                }
                 errorsList.add(String.format("Error: set with wrong blockName settings: %s (blockName = %s, but must be %s)",
                         set.getCode() + " - " + set.getName(),
                         set.getBlockName(),
@@ -1708,6 +1714,10 @@ public class VerifyCardDataTest {
                     }
                 }
 
+                if (obj1 instanceof Ability) {
+                    checkAbility(originalCard, (Ability) obj1, msg);
+                }
+
                 //System.out.println(msg);
                 Class class1 = obj1.getClass();
                 Class class2 = obj2.getClass();
@@ -1841,6 +1851,35 @@ public class VerifyCardDataTest {
             }
         }
     }
+
+    // One (fake) event per batch event type
+    private static Set<GameEvent> fakeBatchEvents;
+
+    static {
+        fakeBatchEvents = Stream
+                .of(GameEvent.EventType.values())
+                .filter(GameEvent.EventType::isBatch)
+                .map(eventType -> new GameEvent(eventType, null, null, null))
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Perform checks on abilities
+     */
+    private void checkAbility(Card originalCard, Ability ability, String msg) {
+        if (ability instanceof TriggeredAbility) {
+            // Checks that non-batched triggered ability don't accept batch events.
+            if (!(ability instanceof BatchTriggeredAbility)) {
+                for (GameEvent event : fakeBatchEvents) {
+                    if (((TriggeredAbility) ability).checkEventType(event, null)) {
+                        fail(originalCard, "checkAbility", "unexpected non-BatchTriggeredAbility accepting "
+                                + event.getType() + " " + msg + "<" + ability.getClass() + ">");
+                    }
+                }
+            }
+        }
+    }
+
 
     private void checkSubtypes(Card card, MtgJsonCard ref) {
         if (skipListHaveName(SKIP_LIST_SUBTYPE, card.getExpansionSetCode(), card.getName())) {
@@ -2907,8 +2946,12 @@ public class VerifyCardDataTest {
         List<ExpansionSet.SetCardInfo> setInfo = Sets.getInstance().get(setCode).getSetCardInfo();
         for (ExpansionSet.SetCardInfo sci : setInfo) {
             int cn = sci.getCardNumberAsInt();
-            if (cn > maxCards) continue;
-            if (doExclude && excluded.contains(cn)) continue;
+            if (cn > maxCards) {
+                continue;
+            }
+            if (doExclude && excluded.contains(cn)) {
+                continue;
+            }
             listChangelog.add(cn);
         }
 
