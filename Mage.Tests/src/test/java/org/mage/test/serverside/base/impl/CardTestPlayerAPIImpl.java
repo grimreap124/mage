@@ -1586,6 +1586,7 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
     public void assertTopCardRevealed(TestPlayer player, boolean isRevealed) {
         Assert.assertEquals(isRevealed, player.isTopCardRevealed());
     }
+
     /**
      * Asserts if, or if not, theAttachment is attached to thePermanent.
      *
@@ -1596,14 +1597,14 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
                 .filter(permanent -> permanent.isControlledBy(thePlayer.getId()))
                 .filter(permanent -> permanent.getName().equals(thePermanent))
                 .collect(Collectors.toList());
-        assertTrue(theAttachment + " was "+ (!isAttached ? "":"not") +" attached to " + thePermanent,
+        assertTrue(theAttachment + " was " + (!isAttached ? "" : "not") + " attached to " + thePermanent,
                 !isAttached ^
-                permanents.stream()
-                        .anyMatch(permanent -> permanent.getAttachments()
-                                .stream()
-                                .map(id -> currentGame.getCard(id))
-                                .map(MageObject::getName)
-                                .collect(Collectors.toList()).contains(theAttachment)));
+                        permanents.stream()
+                                .anyMatch(permanent -> permanent.getAttachments()
+                                        .stream()
+                                        .map(id -> currentGame.getCard(id))
+                                        .map(MageObject::getName)
+                                        .collect(Collectors.toList()).contains(theAttachment)));
     }
 
 
@@ -2126,6 +2127,21 @@ public abstract class CardTestPlayerAPIImpl extends MageTestPlayerBase implement
             player.addTarget("targetPlayer=" + targetPlayer.getName());
         }
     }
+
+    /**
+     * Sets players as target
+     */
+    public void addTarget(TestPlayer player, TestPlayer... targetPlayers) {
+        String target = "targetPlayer=";
+        for (int i = 0; i < targetPlayers.length; ++i) {
+            if (i > 0) {
+                target += "^";
+            }
+            target += targetPlayers[i].getName();
+        }
+        player.addTarget(target);
+    }
+
 
     /**
      * @param player
