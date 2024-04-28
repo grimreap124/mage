@@ -55,7 +55,7 @@ public abstract class BatchEvent<T extends GameEvent> extends GameEvent {
             throw new IllegalStateException("Wrong code usage. Batch event initiated with single target id, but trying to add event with different target id");
         }
         if (singleSourceId && !getSourceId().equals(event.getSourceId())) {
-            throw new IllegalStateException("Wrong code usage. Batch event initiated with single source id, but trying to add event with different target id");
+            throw new IllegalStateException("Wrong code usage. Batch event initiated with single source id, but trying to add event with different source id");
         }
         this.events.add(event);
     }
