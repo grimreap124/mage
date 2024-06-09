@@ -24,6 +24,7 @@ import mage.target.common.TargetOpponent;
 import mage.abilities.keyword.EnchantAbility;
 import mage.cards.CardImpl;
 import mage.cards.CardSetInfo;
+import mage.util.CardUtil;
 import mage.util.ManaUtil;
 
 /**
@@ -89,9 +90,11 @@ class OverencumberedTokenEffect extends OneShotEffect {
     public boolean apply(Game game, Ability source) {
 //        game.informPlayers("targets" + getTargetPointer().toString());
 //        getTargetPointer().getFirst(game, source);
-        Permanent permanent = game.getPermanent(source.getSourceId());
+        Spell spell = game.getStack().getSpell(source.getId());
+        Permanent enchantment = source.getSourcePermanentIfItStillExists(game);
+        Permanent permanent = game.getPermanentOrLKIBattlefield(source.getSourceId());
 
-        game.informPlayers("effects: " + permanent.getSpellAbility().getTargets().getFirstTarget());
+        game.informPlayers("effects: " + spell.getSpellAbility().getTargets().getFirstTarget());
         boolean clue = new ClueArtifactToken().putOntoBattlefield(1, game, source, getTargetPointer().getFirst(game, source));
         boolean food = new FoodToken().putOntoBattlefield(1, game, source, getTargetPointer().getFirst(game, source));
         boolean junk = new JunkToken().putOntoBattlefield(1, game, source, getTargetPointer().getFirst(game, source));
