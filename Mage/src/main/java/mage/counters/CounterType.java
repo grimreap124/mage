@@ -205,6 +205,7 @@ public enum CounterType {
     STUDY("study"),
     STUN("stun"),
     SUSPECT("suspect"),
+    TAKEOVER("takeover"),
     TASK("task"),
     THEFT("theft"),
     TIDE("tide"),
