@@ -9,6 +9,7 @@ import mage.abilities.effects.EntersBattlefieldEffect;
 import mage.abilities.effects.OneShotEffect;
 import mage.abilities.effects.common.CastSourceTriggeredAbility;
 import mage.abilities.effects.common.CopyEffect;
+import mage.abilities.effects.common.ExileTargetEffect;
 import mage.cards.Card;
 import mage.constants.*;
 import mage.cards.CardImpl;
@@ -46,14 +47,14 @@ public final class TheMasterFormedAnew extends CardImpl {
         this.toughness = new MageInt(1);
 
         // Body Thief -- When you cast this spell, you may exile a creature you control and put a takeover counter on it.
-        Ability ability = new CastSourceTriggeredAbility(new TheMasterFormedAnewEffect());
+        Ability ability = new CastSourceTriggeredAbility(new TheMasterFormedAnewEffect(), true);
         ability.addTarget(new TargetControlledCreaturePermanent());
         ability.setAbilityWord(AbilityWord.BODY_THIEF);
         this.addAbility(ability);
         // You may have The Master, Formed Anew enter the battlefield as a copy of a creature card in exile with a takeover counter on it.
-        ability = new EntersBattlefieldAbility(new TheAnimusCopyEffect(), true);
-        ability.addTarget(new TargetCardInExile(1, 1, exileFilter));
-        this.addAbility(ability);
+        Ability ability2 = new EntersBattlefieldAbility(new TheAnimusCopyEffect(), true);
+        ability2.addTarget(new TargetCardInExile(1, 1, StaticFilters.FILTER_CARD));
+        this.addAbility(ability2);
     }
 
     private TheMasterFormedAnew(final TheMasterFormedAnew card) {
@@ -95,11 +96,11 @@ class TheMasterFormedAnewEffect extends OneShotEffect {
             return false;
         }
         controller.moveCards(card, Zone.EXILED, source, game);
+//        new ExileTargetEffect().apply(game, source);
+        if (game.getState().getZone(card.getId()) != Zone.EXILED) {
+            return true;
+        }
 
-        game.informPlayers("Zone: " + game.getState().getZone(card.getId()));
-//        if (game.getState().getZone(card.getId()) != Zone.EXILED) {
-//            return true;
-//        }
         card.addCounters(CounterType.TAKEOVER.createInstance(), source.getControllerId(), source, game);
         return true;
     }
@@ -125,17 +126,23 @@ class TheAnimusCopyEffect extends OneShotEffect {
     public boolean apply(Game game, Ability source) {
         Permanent sourcePermanent = game.getPermanent(source.getSourceId());
 
-        UUID targetId = source.getTargets().getFirstTarget();
+        UUID targetIdt = source.getTargets().getFirstTarget();
+        if (targetIdt == null) {
+            game.informPlayers("Targetidt null");
+        }
+        UUID targetId = getTargetPointer().getFirst(game, source);
 
         if (targetId == null) {
+            game.informPlayers("Targetid null");
             return false;
         }
         Card copyFromPermanent = game.getCard(targetId);
         if (sourcePermanent == null || copyFromPermanent == null) {
+            game.informPlayers("Targetid null");
             return false;
         }
 
-        ContinuousEffect copyEffect = new CopyEffect(Duration.EndOfTurn, copyFromPermanent.getMainCard(), targetId);
+        ContinuousEffect copyEffect = new CopyEffect(Duration.WhileOnBattlefield, copyFromPermanent.getMainCard(), targetId);
         game.addEffect(copyEffect, source);
         return true;
     }
