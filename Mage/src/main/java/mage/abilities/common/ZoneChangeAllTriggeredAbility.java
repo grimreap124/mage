@@ -58,6 +58,7 @@ public class ZoneChangeAllTriggeredAbility extends TriggeredAbilityImpl {
             } else {
                 perm = game.getPermanent(event.getTargetId()); // LevelX2: maybe this part is not neccessary
             }
+            game.informPlayers("Perm: " + perm.toString());
             if (filter.match(perm, controllerId, this, game)) {
                 return true;
             }

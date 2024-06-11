@@ -7,6 +7,7 @@ import mage.abilities.effects.Effect;
 import mage.constants.Zone;
 import mage.game.Game;
 import mage.game.events.GameEvent;
+import mage.target.targetpointer.FixedTarget;
 import mage.util.CardUtil;
 import mage.watchers.Watcher;
 
@@ -29,15 +30,25 @@ public class OrTriggeredAbility extends TriggeredAbilityImpl {
 
     private final String ruleTrigger;
     private final List<TriggeredAbility> triggeredAbilities = new ArrayList<>();
+    private final boolean setTarget;
 
     public OrTriggeredAbility(Zone zone, Effect effect, TriggeredAbility... abilities) {
-        this(zone, effect, false, null, abilities);
+        this(zone, effect, false, null, false, abilities);
+    }
+
+    public OrTriggeredAbility(Zone zone, Effect effect, boolean setTarget, TriggeredAbility... abilities) {
+        this(zone, effect, false, null, setTarget, abilities);
     }
 
     public OrTriggeredAbility(Zone zone, Effect effect, boolean optional, String ruleTrigger, TriggeredAbility... abilities) {
+        this(zone, effect, optional, ruleTrigger, false, abilities);
+    }
+
+    public OrTriggeredAbility(Zone zone, Effect effect, boolean optional, String ruleTrigger, boolean setTarget, TriggeredAbility... abilities) {
         super(zone, effect, optional);
         this.ruleTrigger = ruleTrigger;
         this.withRuleTextReplacement(false);
+        this.setTarget = setTarget;
         Collections.addAll(this.triggeredAbilities, abilities);
         for (TriggeredAbility ability : triggeredAbilities) {
             //Remove useless data
@@ -53,6 +64,7 @@ public class OrTriggeredAbility extends TriggeredAbilityImpl {
     public OrTriggeredAbility(OrTriggeredAbility ability) {
         super(ability);
         this.ruleTrigger = ability.ruleTrigger;
+        this.setTarget = ability.setTarget;
         for (TriggeredAbility triggeredAbility : ability.triggeredAbilities) {
             this.triggeredAbilities.add(triggeredAbility.copy());
         }
@@ -74,6 +86,9 @@ public class OrTriggeredAbility extends TriggeredAbilityImpl {
         for (TriggeredAbility ability : triggeredAbilities) {
             if (ability.checkEventType(event, game) && ability.checkTrigger(event, game)) {
                 toRet = true;
+                if (setTarget) {
+                    getEffects().setTargetPointer(new FixedTarget(event.getTargetId(), game));
+                }
             }
         }
         return toRet;
