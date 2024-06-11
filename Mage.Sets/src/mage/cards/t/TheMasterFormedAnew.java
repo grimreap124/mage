@@ -46,8 +46,9 @@ public final class TheMasterFormedAnew extends CardImpl {
         this.toughness = new MageInt(1);
 
         // Body Thief -- When you cast this spell, you may exile a creature you control and put a takeover counter on it.
-        Ability ability = new CastSourceTriggeredAbility(new TheMasterFormedAnewEffect(), true);
+        Ability ability = new CastSourceTriggeredAbility(new TheMasterFormedAnewEffect());
         ability.addTarget(new TargetControlledCreaturePermanent());
+        ability.setAbilityWord(AbilityWord.BODY_THIEF);
         this.addAbility(ability);
         // You may have The Master, Formed Anew enter the battlefield as a copy of a creature card in exile with a takeover counter on it.
         ability = new EntersBattlefieldAbility(new TheAnimusCopyEffect(), true);
@@ -94,9 +95,11 @@ class TheMasterFormedAnewEffect extends OneShotEffect {
             return false;
         }
         controller.moveCards(card, Zone.EXILED, source, game);
-        if (game.getState().getZone(card.getId()) != Zone.EXILED) {
-            return false;
-        }
+
+        game.informPlayers("Zone: " + game.getState().getZone(card.getId()));
+//        if (game.getState().getZone(card.getId()) != Zone.EXILED) {
+//            return true;
+//        }
         card.addCounters(CounterType.TAKEOVER.createInstance(), source.getControllerId(), source, game);
         return true;
     }
@@ -106,7 +109,7 @@ class TheAnimusCopyEffect extends OneShotEffect {
 
     TheAnimusCopyEffect() {
         super(Outcome.Copy);
-        this.staticText = "You may have {this} enter the battlefield as a copy of a creature card in exile with a takeover counter on it";
+        this.staticText = "as a copy of a creature card in exile with a takeover counter on it";
     }
 
     private TheAnimusCopyEffect(final TheAnimusCopyEffect effect) {
