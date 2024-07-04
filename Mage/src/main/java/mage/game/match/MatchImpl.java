@@ -1,5 +1,6 @@
 package mage.game.match;
 
+import mage.cards.Card;
 import mage.cards.decks.Deck;
 import mage.game.Game;
 import mage.game.GameException;
@@ -18,6 +19,7 @@ import mage.util.ThreadUtils;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author BetaSteward_at_googlemail.com
@@ -400,6 +402,10 @@ public abstract class MatchImpl implements Match {
     }
 
     protected String createGameStartMessage() {
+        return createGameStartMessage(false);
+    }
+
+    protected String createGameStartMessage(boolean isCommander) {
         StringBuilder sb = new StringBuilder();
         sb.append("<br/><b>Match score:</b><br/>");
         for (MatchPlayer mp : this.getPlayers()) {
@@ -408,6 +414,11 @@ public abstract class MatchImpl implements Match {
             if (mp.hasQuit()) {
                 sb.append(" QUITTED");
             }
+            if (isCommander) {
+                sb.append(" ");
+                sb.append(mp.getDeck().getSideboard().stream().map(Card::getName).collect(Collectors.joining(", ")));
+            }
+
             sb.append("<br/>");
         }
         if (getDraws() > 0) {

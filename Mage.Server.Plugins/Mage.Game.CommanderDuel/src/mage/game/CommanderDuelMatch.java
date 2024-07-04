@@ -36,7 +36,7 @@ public class CommanderDuelMatch extends MatchImpl {
                 mulligan, startLife, startHandSize
         );
         game.setCheckCommanderDamage(checkCommanderDamage);
-        game.setStartMessage(this.createGameStartMessage());
+        game.setStartMessage(this.createGameStartMessage(true));
         initGame(game);
         games.add(game);
     }

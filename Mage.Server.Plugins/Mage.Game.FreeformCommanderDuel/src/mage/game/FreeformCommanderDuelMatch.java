@@ -25,7 +25,7 @@ public class FreeformCommanderDuelMatch extends MatchImpl {
                 mulligan, startLife, startHandSize
         );
         game.setCheckCommanderDamage(true);
-        game.setStartMessage(this.createGameStartMessage());
+        game.setStartMessage(this.createGameStartMessage(true));
         initGame(game);
         games.add(game);
     }

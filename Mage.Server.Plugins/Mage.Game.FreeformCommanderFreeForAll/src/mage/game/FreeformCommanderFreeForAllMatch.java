@@ -23,7 +23,7 @@ public class FreeformCommanderFreeForAllMatch extends MatchImpl {
                 options.getAttackOption(), options.getRange(),
                 mulligan, startLife, startHandSize
         );
-        game.setStartMessage(this.createGameStartMessage());
+        game.setStartMessage(this.createGameStartMessage(true));
         initGame(game);
         games.add(game);
     }
